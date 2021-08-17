@@ -18,8 +18,9 @@ class Commit {
         this.date = specObject.date;
         this.originalAuthor = specObject.author;
         this.msg = specObject.msg;
+        this.title = specObject.caption;
         this.authors = this.getAuthors();
-
+        this.titleTokens = this.title.split(" ").map(string => string.toLowerCase());
     }
 
     static getAuthorNames() {
@@ -50,6 +51,10 @@ class Commit {
         return globalThis.commits.filter(commit => authorsList.every(author => commit.authors.includes(author)));
     }
 
+    static getAllTitleTokens() {
+        return globalThis.commits.flatMap(commit => commit.titleTokens);
+    }
+
 }
 
 async function startAnalysis() {
@@ -63,6 +68,7 @@ async function startAnalysis() {
     let commitCounts = permutations.map(permutation => [permutation, Commit.getCommitsWithAuthors(permutation)]);
 
     createPermutationCountTable(commitCounts);
+    analyzeCommitTitles();
 }
 
 function createPermutationCountTable(commitCounts) {
@@ -75,16 +81,32 @@ function createPermutationCountTable(commitCounts) {
     globalThis.tableElements = elements;
     let tableContent = "";
     elements.forEach((element, index) => {
-        if(index % 6 == 0){
+        if (index % 6 == 0) {
             tableContent = tableContent + "<tr>";
         }
         tableContent = tableContent + `<td>${element}</td>`;
-        if(index % 6 == 5){
+        if (index % 6 == 5) {
             tableContent = tableContent + "</tr>";
         }
     });
     table.innerHTML = tableContent;
     document.getElementById("table-container").appendChild(table);
+}
+
+function analyzeCommitTitles() {
+    let allTokens = Commit.getAllTitleTokens();
+    let counts = new Map();
+    for (let i = 0; i < allTokens.length; i++) {
+        counts.set(allTokens[i],1 + counts.get(allTokens[i]) || 0);
+    }
+    let mostCommonCommitTokens = Array.from(counts.entries()).sort((a,b) => b[1] - a[1]);
+    let listOfMostCommonCommitTokens = document.createElement("ol");
+    mostCommonCommitTokens.slice(0,10).forEach(pair => {
+        let listItem = document.createElement("li");
+        listItem.innerHTML = `${pair[0]}: ${pair[1]}`;
+        listOfMostCommonCommitTokens.appendChild(listItem);
+    });
+    document.getElementById("commit-tokens-container").appendChild(listOfMostCommonCommitTokens);
 }
 
 startAnalysis();
