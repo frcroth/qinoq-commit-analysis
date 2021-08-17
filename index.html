@@ -21,8 +21,6 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans&display=swap" rel="stylesheet"> 
 
-    <!-- <script type="module" src="https://jspm.dev/npm:chart.js"></script> -->
-
     <link rel="stylesheet" href="style/main.css">
 </head>
 
@@ -41,6 +39,16 @@
         <b>Duplicate commit titles</b>
         <div id="commit-titles-container"></div>
     </div>
+    <div class="card">
+        <h5 class="card-title">Commits over time</h5>
+        <div id="commit-dates-container"><canvas width="400px" height="200px" id="diagram-canvas"></canvas></div>
+    </div>
+
+    <!-- chart.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.bundle.js"
+        integrity="sha512-zO8oeHCxetPn1Hd9PdDleg5Tw1bAaP0YmNvPY8CwcRyUk7d7/+nyElmFrB6f7vg4f7Fv4sui1mcep8RIEShczg=="
+        crossorigin="anonymous"></script>
+    
     <script src="analysis.js"></script>
 </body>
 

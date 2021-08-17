@@ -55,6 +55,17 @@ class Commit {
         return globalThis.commits.flatMap(commit => commit.titleTokens);
     }
 
+    static getCommitsByDate(start, end, author) {
+        let startDate = new Date(start);
+        let endDate = new Date(end);
+        let interestingDays = [];
+        for (let d = startDate; d <= endDate; d.setDate(d.getDate() + 1)) {
+            interestingDays.push(new Date(d));
+        }
+        let data = []
+        interestingDays.forEach(day => data.push([day, globalThis.commits.filter(commit => commit.date.toDateString() == day.toDateString() && commit.authors.includes(author))]));
+        return data;
+    }
 }
 
 async function startAnalysis() {
@@ -78,6 +89,7 @@ async function startAnalysis() {
     createPermutationCountTable(commitCounts);
     analyzeCommitTitleTokens();
     analyzeCommitTitleDuplicates();
+    analyzeCommitCountOverTime();
 }
 
 function createPermutationCountTable(commitCounts) {
@@ -105,10 +117,10 @@ function createPermutationCountTable(commitCounts) {
 function analyzeCommitTitleTokens() {
     let allTokens = Commit.getAllTitleTokens();
     let counts = new Map();
-    allTokens.forEach(token => counts.set(token,1 + counts.get(token) || 0));
-    let mostCommonCommitTokens = Array.from(counts.entries()).sort((a,b) => b[1] - a[1]);
+    allTokens.forEach(token => counts.set(token, 1 + counts.get(token) || 0));
+    let mostCommonCommitTokens = Array.from(counts.entries()).sort((a, b) => b[1] - a[1]);
     let listOfMostCommonCommitTokens = document.createElement("ol");
-    mostCommonCommitTokens.slice(0,10).forEach(pair => {
+    mostCommonCommitTokens.slice(0, 10).forEach(pair => {
         let listItem = document.createElement("li");
         listItem.innerHTML = `${pair[0]}: ${pair[1]} times`;
         listOfMostCommonCommitTokens.appendChild(listItem);
@@ -119,8 +131,8 @@ function analyzeCommitTitleTokens() {
 function analyzeCommitTitleDuplicates() {
     let allTokens = globalThis.commits.map(commit => commit.title);
     let counts = new Map();
-    allTokens.forEach(token => counts.set(token,1 + counts.get(token) || 0));
-    let mostCommonTitles = Array.from(counts.entries()).sort((a,b) => b[1] - a[1]);
+    allTokens.forEach(token => counts.set(token, 1 + counts.get(token) || 0));
+    let mostCommonTitles = Array.from(counts.entries()).sort((a, b) => b[1] - a[1]);
     mostCommonTitles = mostCommonTitles.filter(pair => pair[1] > 1);
     let listOfMostCommonCommitTitles = document.createElement("ol");
     mostCommonTitles.forEach(pair => {
@@ -129,6 +141,55 @@ function analyzeCommitTitleDuplicates() {
         listOfMostCommonCommitTitles.appendChild(listItem);
     });
     document.getElementById("commit-titles-container").appendChild(listOfMostCommonCommitTitles);
+}
+
+function generateRandomColor() {
+    return "#" + (0x1000000 + (Math.random()) * 0xffffff).toString(16).substr(1, 6);
+}
+
+function analyzeCommitCountOverTime() {
+    const start = "2021-01-01";
+    const end = "2021-08-11";
+    let countPerDay = {};
+    Commit.getAuthorNames().forEach(author => {
+        let commits = Commit.getCommitsByDate(start, end, author);
+        countPerDay[author] = commits.map(dateCommitArray => { return { x: dateCommitArray[0].toISOString().split('T')[0], y: dateCommitArray[1].length } });
+    });
+
+    let datasets = Commit.getAuthorNames().map(author => {
+        return {
+            label: author,
+            data: countPerDay[author],
+            fill: true,
+            backgroundColor: generateRandomColor()
+        }
+    })
+
+    const data = {
+        datasets,
+        labels: countPerDay[Commit.getAuthorNames()[0]].map(dateCountPair => dateCountPair.x)
+    }
+
+    let canvas = document.getElementById("diagram-canvas");
+    let ctx = canvas.getContext("2d");
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    new Chart(ctx, {
+        type: "line",
+        data: data,
+        options: {
+            scales: {
+                x: {
+                    title: {
+                        display: true,
+                        text: "Date"
+                    }
+                },
+                y: {
+                    stacked: true
+                }
+            }
+        }
+    })
 }
 
 startAnalysis();
