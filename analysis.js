@@ -59,6 +59,14 @@ class Commit {
 
 async function startAnalysis() {
     let commitSpecs = JSON.parse(await ajax("commits.json"));
+
+    /*
+    * Commit data generation:
+    * 1. Navigate into repository
+    * 2. Use command `git log --pretty=format:'{"hash":"%h","author":"%an","date":"%as","caption":"%s","msg":"%B"},' > commits.json`
+    * 3. Add brackets for valid json, remove newlines
+    */
+
     globalThis.commits = commitSpecs.map(element => new Commit(element));
 
     // create table for collaboration

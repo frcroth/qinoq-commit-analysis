@@ -7,8 +7,7 @@
     <meta name="description" content="qinoq commit analysis" />
     <meta name="author" content="frcroth" />
     <title>Commit analysis</title>
-
-    <link rel="stylesheet" href="styles/main.css">
+    
     <!-- Bootstrap -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
         integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous" />
@@ -16,20 +15,28 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-b5kHyXgcpbZJO/tY9Ul7kGkf1S0CWuKcCD38l8YkeH8z8QjE0GmW1gYU5S9FOnJ0"
         crossorigin="anonymous"></script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans&display=swap" rel="stylesheet"> 
+
+    <link rel="stylesheet" href="style/main.css">
 </head>
 
 <body>
-    <div class="container">
+    <div class="top-bar">
         <h1>qinoq Commit Analysis</h1>
     </div>
     <div class="card">
-        <h5>Who worked with whom?</h5>
+        <h5 class="card-title">Who worked with whom?</h5>
         <div id="table-container"></div>
     </div>
     <div class="card">
-        <h5>Most common words in commit titles</h5>
+        <h5 class="card-title">Fun with words</h5>
+        <b>Most common words in commit titles</b>
         <div id="commit-tokens-container"></div>
-        <h5>Duplicate commit titles</h5>
+        <b>Duplicate commit titles</b>
         <div id="commit-titles-container"></div>
     </div>
     <script src="analysis.js"></script>
