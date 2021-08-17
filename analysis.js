@@ -19,7 +19,7 @@ class Commit {
         this.originalAuthor = specObject.author;
         this.msg = specObject.msg;
         this.authors = this.getAuthors();
-        
+
     }
 
     static getAuthorNames() {
@@ -39,7 +39,7 @@ class Commit {
         let authors = new Set();
         authors.add(this.getAuthorFromName(this.originalAuthor));
         Commit.getAuthorNames().forEach(authorName => {
-            if (this.msg.includes(authorName)){
+            if (this.msg.includes(authorName)) {
                 authors.add(authorName);
             }
         });
@@ -62,7 +62,29 @@ async function startAnalysis() {
 
     let commitCounts = permutations.map(permutation => [permutation, Commit.getCommitsWithAuthors(permutation)]);
 
-    globalThis.commitCounts = commitCounts;
+    createPermutationCountTable(commitCounts);
+}
+
+function createPermutationCountTable(commitCounts) {
+    let table = document.createElement("table");
+    table.classList.add("table")
+    let elements = [""];
+    elements = elements.concat(Commit.getAuthorNames());
+    elements = [...elements, ...commitCounts.map(commitCount => commitCount[1].length)];
+    Commit.getAuthorNames().forEach((authorName, index) => elements.splice((index + 1) * 6, 0, authorName));
+    globalThis.tableElements = elements;
+    let tableContent = "";
+    elements.forEach((element, index) => {
+        if(index % 6 == 0){
+            tableContent = tableContent + "<tr>";
+        }
+        tableContent = tableContent + `<td>${element}</td>`;
+        if(index % 6 == 5){
+            tableContent = tableContent + "</tr>";
+        }
+    });
+    table.innerHTML = tableContent;
+    document.getElementById("table-container").appendChild(table);
 }
 
 startAnalysis();
