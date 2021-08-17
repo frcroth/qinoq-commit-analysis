@@ -1,4 +1,5 @@
 'use strict';
+
 function ajax(url) {
     return new Promise(function (resolve, reject) {
         var xhr = new XMLHttpRequest();
@@ -11,8 +12,6 @@ function ajax(url) {
     });
 }
 
-
-
 class Commit {
     constructor(specObject) {
         this.hash = specObject.hash;
@@ -21,6 +20,10 @@ class Commit {
         this.msg = specObject.msg;
         this.authors = this.getAuthors();
         
+    }
+
+    static getAuthorNames() {
+        return ['frcroth', 'linusha', 'Paula-Kli', 'SilvanVerhoeven', 'T4rikA'];
     }
 
     getAuthorFromName(name) {
@@ -35,13 +38,16 @@ class Commit {
     getAuthors() {
         let authors = new Set();
         authors.add(this.getAuthorFromName(this.originalAuthor));
-        const author_names = ['frcroth', 'linusha', 'Paula-Kli', 'SilvanVerhoeven', 'T4rikA'];
-        author_names.forEach(author_name => {
-            if (this.msg.includes(author_name)){
-                authors.add(author_name);
+        Commit.getAuthorNames().forEach(authorName => {
+            if (this.msg.includes(authorName)){
+                authors.add(authorName);
             }
         });
         return Array.from(authors);
+    }
+
+    static getCommitsWithAuthors(authorsList) {
+        return globalThis.commits.filter(commit => authorsList.every(author => commit.authors.includes(author)));
     }
 
 }
@@ -49,6 +55,14 @@ class Commit {
 async function startAnalysis() {
     let commitSpecs = JSON.parse(await ajax("commits.json"));
     globalThis.commits = commitSpecs.map(element => new Commit(element));
+
+    // create table for collaboration
+    let permutations = Commit.getAuthorNames().flatMap(author => Commit.getAuthorNames().map(author2 => [author, author2]));
+    permutations = permutations.map(permutation => permutation[0] != permutation[1] ? permutation : [permutation[1]]);
+
+    let commitCounts = permutations.map(permutation => [permutation, Commit.getCommitsWithAuthors(permutation)]);
+
+    globalThis.commitCounts = commitCounts;
 }
 
 startAnalysis();
