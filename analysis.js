@@ -15,7 +15,7 @@ function ajax(url) {
 class Commit {
     constructor(specObject) {
         this.hash = specObject.hash;
-        this.date = specObject.date;
+        this.date = new Date(specObject.date);
         this.originalAuthor = specObject.author;
         this.msg = specObject.msg;
         this.title = specObject.caption;
