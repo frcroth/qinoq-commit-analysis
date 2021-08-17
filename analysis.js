@@ -68,7 +68,8 @@ async function startAnalysis() {
     let commitCounts = permutations.map(permutation => [permutation, Commit.getCommitsWithAuthors(permutation)]);
 
     createPermutationCountTable(commitCounts);
-    analyzeCommitTitles();
+    analyzeCommitTitleTokens();
+    analyzeCommitTitleDuplicates();
 }
 
 function createPermutationCountTable(commitCounts) {
@@ -93,20 +94,33 @@ function createPermutationCountTable(commitCounts) {
     document.getElementById("table-container").appendChild(table);
 }
 
-function analyzeCommitTitles() {
+function analyzeCommitTitleTokens() {
     let allTokens = Commit.getAllTitleTokens();
     let counts = new Map();
-    for (let i = 0; i < allTokens.length; i++) {
-        counts.set(allTokens[i],1 + counts.get(allTokens[i]) || 0);
-    }
+    allTokens.forEach(token => counts.set(token,1 + counts.get(token) || 0));
     let mostCommonCommitTokens = Array.from(counts.entries()).sort((a,b) => b[1] - a[1]);
     let listOfMostCommonCommitTokens = document.createElement("ol");
     mostCommonCommitTokens.slice(0,10).forEach(pair => {
         let listItem = document.createElement("li");
-        listItem.innerHTML = `${pair[0]}: ${pair[1]}`;
+        listItem.innerHTML = `${pair[0]}: ${pair[1]} times`;
         listOfMostCommonCommitTokens.appendChild(listItem);
     });
     document.getElementById("commit-tokens-container").appendChild(listOfMostCommonCommitTokens);
+}
+
+function analyzeCommitTitleDuplicates() {
+    let allTokens = globalThis.commits.map(commit => commit.title);
+    let counts = new Map();
+    allTokens.forEach(token => counts.set(token,1 + counts.get(token) || 0));
+    let mostCommonTitles = Array.from(counts.entries()).sort((a,b) => b[1] - a[1]);
+    mostCommonTitles = mostCommonTitles.filter(pair => pair[1] > 1);
+    let listOfMostCommonCommitTitles = document.createElement("ol");
+    mostCommonTitles.forEach(pair => {
+        let listItem = document.createElement("li");
+        listItem.innerHTML = `${pair[0]}: ${pair[1]} times`;
+        listOfMostCommonCommitTitles.appendChild(listItem);
+    });
+    document.getElementById("commit-titles-container").appendChild(listOfMostCommonCommitTitles);
 }
 
 startAnalysis();
